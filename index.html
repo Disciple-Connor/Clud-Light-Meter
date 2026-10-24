@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Clud Light Meter</title>
+<meta name="theme-color" content="#E6E8E6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121415" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Clud Meter">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+/* Layout: one narrow instrument column — readout up top like a meter face, controls below like dials */
+:root{
+  --bg:#E6E8E6; --panel:#F6F7F5; --ink:#16191B; --muted:#5B6266; --line:#C5CAC8;
+  --needle:#C3321C; --needle-soft:#C3321C1A; --warn:#9A5A00;
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121415; --panel:#1C1F21; --ink:#ECEEEB; --muted:#9BA2A5; --line:#33393C;
+  --needle:#FF5B3E; --needle-soft:#FF5B3E22; --warn:#E3A541; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121415; --panel:#1C1F21; --ink:#ECEEEB; --muted:#9BA2A5; --line:#33393C;
+  --needle:#FF5B3E; --needle-soft:#FF5B3E22; --warn:#E3A541; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px}
+.wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+h1{font-family:var(--f-display);font-weight:700;font-size:26px;letter-spacing:.06em;text-transform:uppercase;margin:0}
+.tag{font-family:var(--f-mono);font-size:11px;color:var(--muted);letter-spacing:.04em}
+.label{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+section{display:flex;flex-direction:column;gap:8px}
+
+/* meter face */
+.face{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.src{font-size:13px;color:var(--muted);min-height:1.2em}
+.src b{color:var(--ink);font-weight:600}
+.reading{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.big{font-family:var(--f-display);font-weight:700;font-size:64px;line-height:.95;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.big .sep{color:var(--needle);padding:0 .08em}
+.sub{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.sub span b{color:var(--ink);font-weight:500}
+.scale{width:100%;height:auto;display:block}
+.scale .tk{stroke:var(--muted);stroke-width:1}
+.scale .tx{fill:var(--muted);font-family:var(--f-mono);font-size:9px}
+.scale .base{stroke:var(--line);stroke-width:1}
+.scale .nd{stroke:var(--needle);stroke-width:2.5;transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+.scale .ndh{fill:var(--needle);transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+.note{font-size:13px;color:var(--warn);display:flex;flex-direction:column;gap:2px}
+
+/* photo */
+.shot{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--panel);cursor:crosshair}
+.shot img{display:block;width:100%;height:auto}
+.ret{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #0008, inset 0 0 0 1px #0008;pointer-events:none}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:10px;border:1px solid var(--line);
+  background:var(--panel);color:var(--ink);font-family:var(--f-display);font-weight:600;font-size:16px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:focus-visible,.chip:focus-visible,.step:focus-visible{outline:2px solid var(--needle);outline-offset:2px}
+.pick{position:relative;display:grid}
+.pick input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:1}
+.pick:focus-within .btn{outline:2px solid var(--needle);outline-offset:2px}
+
+/* chips */
+.row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.row::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;min-width:48px;height:40px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);
+  font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--needle);border-color:var(--needle);color:#fff}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{height:40px;border:0;background:var(--panel);color:var(--muted);font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+.stepper{display:flex;align-items:center;gap:10px}
+.step{width:44px;height:40px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:20px;cursor:pointer}
+.stepval{flex:1;text-align:center;font-family:var(--f-mono);font-size:16px;font-variant-numeric:tabular-nums}
+.hint{font-size:12.5px;color:var(--muted)}
+
+/* table */
+table{width:100%;border-collapse:collapse;font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+th{font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line)}
+tr.on td{background:var(--needle-soft)}
+tr.on td:first-child{box-shadow:inset 3px 0 0 var(--needle)}
+td.dim{color:var(--muted)}
+td .adj{color:var(--muted);font-size:12px;margin-left:6px}
+details{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+summary{cursor:pointer;font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase}
+details p{margin:.6em 0 0;font-size:14px;max-width:62ch}
+.presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.preset{text-align:left;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;font-family:var(--f-body);font-size:14px;display:flex;justify-content:space-between;gap:8px}
+.preset span{font-family:var(--f-mono);color:var(--muted);font-size:12px}
+.preset[aria-pressed="true"]{border-color:var(--needle);box-shadow:inset 0 0 0 1px var(--needle)}
+@media (prefers-reduced-motion:reduce){.scale .nd,.scale .ndh{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Clud Light Meter</h1>
+    <span class="tag">35mm · reflected</span>
+  </header>
+
+  <div class="face" aria-live="polite">
+    <div class="src" id="src"></div>
+    <div class="reading"><div class="big" id="big">f/8<span class="sep">·</span>1/250</div></div>
+    <div class="sub" id="sub"></div>
+    <svg class="scale" id="scale" viewBox="0 0 340 50" role="img" aria-label="Exposure value scale"></svg>
+    <div class="note" id="note"></div>
+  </div>
+
+  <section>
+    <div class="btns">
+      <div class="pick"><span class="btn primary" aria-hidden="true">Take reading</span><input type="file" id="cam" accept="image/*" capture="environment" aria-label="Take reading with camera"></div>
+      <div class="pick"><span class="btn" aria-hidden="true">From photos</span><input type="file" id="lib" accept="image/*" aria-label="Choose a photo to meter"></div>
+    </div>
+    
+    <div class="shot" id="shot" hidden><img id="img" alt="Metered scene"><div class="ret" id="ret" hidden></div></div>
+    <div class="seg" id="meterSeg" hidden>
+      <button type="button" id="mCenter" aria-pressed="true">Center-weighted</button>
+      <button type="button" id="mSpot" aria-pressed="false">Spot (tap photo)</button>
+    </div>
+  </section>
+
+  <section>
+    <span class="label">Film speed · ISO</span>
+    <div class="row" id="isoRow"></div>
+  </section>
+
+  <section>
+    <div class="seg">
+      <button type="button" id="modeA" aria-pressed="true">Set aperture</button>
+      <button type="button" id="modeS" aria-pressed="false">Set shutter</button>
+    </div>
+    <div class="row" id="pickRow"></div>
+  </section>
+
+  <section>
+    <span class="label">Compensation</span>
+    <div class="stepper">
+      <button class="step" type="button" id="compM" aria-label="Less exposure">−</button>
+      <div class="stepval" id="compV">0</div>
+      <button class="step" type="button" id="compP" aria-label="More exposure">+</button>
+    </div>
+    <span class="hint">Add +1 to +2 for snow, beaches or backlit subjects. Subtract for dark scenes you want to stay dark.</span>
+  </section>
+
+  <section>
+    <span class="label">Equivalent exposures</span>
+    <div style="overflow-x:auto"><table><thead><tr><th>Aperture</th><th>Shutter</th></tr></thead><tbody id="tbl"></tbody></table></div>
+  </section>
+
+  <details id="s16">
+    <summary>No photo? Use Sunny 16</summary>
+    <p class="hint">Pick the light you're in. These are standard daylight values and work without the camera.</p>
+    <div class="presets" id="presets" style="margin-top:10px"></div>
+  </details>
+
+  <details>
+    <summary>Calibrate</summary>
+    <p>Phones tone-map their photos, so readings can run a little hot or cold. Shoot a test roll. If negatives come out thin, add exposure here; if they're dense, take some away.</p>
+    <div class="stepper" style="margin-top:10px">
+      <button class="step" type="button" id="calM" aria-label="Calibration down">−</button>
+      <div class="stepval" id="calV">0</div>
+      <button class="step" type="button" id="calP" aria-label="Calibration up">+</button>
+    </div>
+  </details>
+
+  <details>
+    <summary>How it works</summary>
+    <p>Your phone camera picks its own exposure for each photo and records it (shutter, aperture, ISO). From that the meter works out the light level in exposure value (EV). It then checks how bright the metered area came out compared with 18% grey, and corrects for it.</p>
+    <p>Pick photos straight from the camera. Screenshots, edited or messaged images usually lose the exposure data. For exposures longer than 1 second, add time for reciprocity failure per your film's data sheet.</p>
+  </details>
+</div>
+
+<script>
+(()=>{
+const ISOS=[25,50,100,125,160,200,400,800,1600,3200];
+const APS=[1.4,2,2.8,4,5.6,8,11,16,22];
+const AP3=[1.4,1.6,1.8,2,2.2,2.5,2.8,3.2,3.5,4,4.5,5,5.6,6.3,7.1,8,9,10,11,13,14,16,18,20,22];
+const SHS=[1/4000,1/2000,1/1000,1/500,1/250,1/125,1/60,1/30,1/15,1/8,1/4,1/2,1,2,4,8,15,30];
+const PRESETS=[["Snow / sand, full sun",16],["Bright sun",15],["Hazy sun, soft shadows",14],["Cloudy bright",13],["Overcast",12],["Open shade",12],["Heavy overcast",11],["Sunset",10],["Bright indoors / stage",8],["Home interior",6],["Lit city street, night",5],["Candlelight",4]];
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+const S={iso:store.get("lm.iso",400),comp:0,calib:store.get("lm.calib",0),mode:"A",ap:8,sh:1/125,
+  source:"sample",ev100:13,preset:null,photo:null,meter:"center",spot:null,note:[]};
+
+const log2=Math.log2;
+const shLabel=t=>t>=1?(t+"″"):("1/"+Math.round(1/t));
+const apLabel=n=>"f/"+(n<10&&n%1?n.toFixed(1):String(n));
+const nearest=(list,v)=>list.reduce((b,x)=>Math.abs(log2(x)-log2(v))<Math.abs(log2(b)-log2(v))?x:b,list[0]);
+const thirds=n=>{if(!n)return"0";const s=n>0?"+":"−",a=Math.abs(n),w=Math.floor(a/3),r=a%3;return s+(w?w:"")+(r===1?"⅓":r===2?"⅔":"")};
+const evFmt=e=>(Math.round(e*3)/3).toFixed(1);
+
+/* ---------- EXIF ---------- */
+function readExif(buf){
+  const v=new DataView(buf); if(v.byteLength<4||v.getUint16(0)!==0xFFD8) return null;
+  let o=2;
+  while(o+4<v.byteLength){
+    const m=v.getUint16(o); if((m&0xFF00)!==0xFF00) break;
+    const len=v.getUint16(o+2);
+    if(m===0xFFE1&&v.getUint32(o+4)===0x45786966) return parseTiff(v,o+10);
+    if(m===0xFFDA) break; o+=2+len;
+  }
+  return null;
+}
+function parseTiff(v,t){
+  const le=v.getUint16(t)===0x4949;
+  const u16=p=>v.getUint16(p,le),u32=p=>v.getUint32(p,le),s32=p=>v.getInt32(p,le);
+  const ifd=p=>{const out={};const n=u16(p);for(let i=0;i<n;i++){const e=p+2+i*12,tag=u16(e),type=u16(e+2);let val;
+      if(type===3)val=u16(e+8);else if(type===4)val=u32(e+8);
+      else if(type===5){const off=t+u32(e+8);const d=u32(off+4);val=d?u32(off)/d:null}
+      else if(type===10){const off=t+u32(e+8);const d=s32(off+4);val=d?s32(off)/d:null}
+      out[tag]=val}return out};
+  try{
+    const i0=ifd(t+u32(t+4)); if(i0[0x8769]==null) return null;
+    const ex=ifd(t+i0[0x8769]);
+    let time=ex[0x829A],f=ex[0x829D],iso=ex[0x8827];
+    if(!time&&ex[0x9201]!=null) time=Math.pow(2,-ex[0x9201]);
+    if(!f&&ex[0x9202]!=null) f=Math.pow(2,ex[0x9202]/2);
+    if(!time||!f||!iso) return null;
+    return {time,f,iso};
+  }catch(e){return null}
+}
+
+/* ---------- luminance ---------- */
+const LUT=new Float32Array(256);for(let i=0;i<256;i++){const c=i/255;LUT[i]=c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4)}
+function lumGrid(img){
+  const W=160,H=Math.max(1,Math.round(W*img.naturalHeight/img.naturalWidth));
+  const c=document.createElement("canvas");c.width=W;c.height=H;
+  const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(img,0,0,W,H);
+  const d=x.getImageData(0,0,W,H).data,Y=new Float32Array(W*H);
+  for(let i=0,j=0;i<d.length;i+=4,j++)Y[j]=.2126*LUT[d[i]]+.7152*LUT[d[i+1]]+.0722*LUT[d[i+2]];
+  return {W,H,Y};
+}
+function meterY(g){
+  let sw=0,sy=0,clip=0;
+  const sx=S.spot?S.spot.x:.5, syy=S.spot?S.spot.y:.5, r=.045*Math.min(g.W,g.H);
+  for(let y=0;y<g.H;y++)for(let x=0;x<g.W;x++){
+    const v=g.Y[y*g.W+x];let w;
+    if(S.meter==="spot"&&S.spot){const dx=x-sx*g.W,dy=y-syy*g.H;w=(dx*dx+dy*dy<=r*r)?1:0}
+    else{const dx=x/g.W-.5,dy=y/g.H-.5;w=Math.exp(-(dx*dx+dy*dy)/(2*.22*.22))}
+    if(w){sw+=w;sy+=w*v;if(v>.97)clip+=w}
+  }
+  return {y:Math.max(sy/sw,1e-4),clip:clip/sw};
+}
+
+/* ---------- compute ---------- */
+function compute(){
+  S.note=[];
+  if(S.source==="photo"&&S.photo){
+    const e=S.photo.exif, camEV=log2(e.f*e.f/e.time)-log2(e.iso/100);
+    const m=meterY(S.photo.grid);
+    S.ev100=camEV+log2(m.y/.18);
+    if(m.clip>.25) S.note.push("Much of the metered area is blown out. Reading may be too low; try spot metering a mid-tone.");
+  }
+  const ev=S.ev100+log2(S.iso/100)-S.comp/3-S.calib/3;
+  return ev;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const ev=compute(), k=Math.pow(2,ev);
+  let ap,sh,exact,rangeMsg="";
+  if(S.mode==="A"){ap=S.ap;exact=ap*ap/k;sh=nearest(SHS,exact);
+    if(exact>30*1.4)rangeMsg="Needs longer than 30″. Open up the aperture or use bulb.";
+    if(exact<1/4000/1.4)rangeMsg="Too bright for 1/4000. Stop down or use slower film.";
+  }else{sh=S.sh;const n=Math.sqrt(sh*k);ap=nearest(AP3,n);exact=null;
+    if(n<1.4/1.2)rangeMsg="Too dark for f/1.4 at this speed. Pick a slower shutter.";
+    if(n>22*1.2)rangeMsg="Too bright for f/22 at this speed. Pick a faster shutter.";
+  }
+  $("big").innerHTML=apLabel(ap)+'<span class="sep">·</span>'+shLabel(sh);
+
+  const srcTxt={sample:'<b>Sample reading</b> (cloudy bright). Take a reading to meter your scene.',
+    preset:'<b>Sunny 16:</b> '+(S.preset||""),
+    photo:S.photo?('<b>Metered photo</b> · phone shot '+apLabel(+S.photo.exif.f.toFixed(1))+' · '+(S.photo.exif.time>=1?S.photo.exif.time+'″':'1/'+Math.round(1/S.photo.exif.time))+' · ISO '+Math.round(S.photo.exif.iso)+' · '+(S.meter==="spot"&&S.spot?"spot":"center-weighted")):''};
+  $("src").innerHTML=srcTxt[S.source];
+  $("sub").innerHTML=`<span>EV<sub>100</sub> <b>${evFmt(S.ev100)}</b></span><span>ISO <b>${S.iso}</b></span><span>Comp <b>${thirds(S.comp+S.calib)}</b></span>`;
+
+  const notes=[...S.note];
+  if(rangeMsg)notes.push(rangeMsg);
+  const t=S.mode==="A"?exact:sh;
+  if(!rangeMsg&&t>1)notes.push("Long exposure: add time for reciprocity failure per your film's data sheet.");
+  else if(!rangeMsg&&t>1/30)notes.push("Slow shutter. Brace the camera or use a tripod.");
+  $("note").innerHTML=notes.map(n=>`<span>${n}</span>`).join("");
+
+  drawScale();
+  // table
+  $("tbl").innerHTML=APS.map(n=>{const ex=n*n/k,s=nearest(SHS,ex),d=Math.round(log2(ex/s)*3);
+    const out=ex>30*1.4||ex<1/4000/1.4;
+    const on=S.mode==="A"?n===S.ap:Math.abs(log2(n)-log2(ap))<.3;
+    return `<tr class="${on?"on":""}"><td>${apLabel(n)}</td><td class="${out?"dim":""}">${out?(ex>30?"over 30″":"faster than 1/4000"):shLabel(s)+(d?`<span class="adj">${thirds(d)} stop</span>`:"")}</td></tr>`}).join("");
+  // chips
+  [...$("isoRow").children].forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===S.iso));
+  $("modeA").setAttribute("aria-pressed",S.mode==="A");$("modeS").setAttribute("aria-pressed",S.mode==="S");
+  buildPick();
+  $("compV").textContent=thirds(S.comp)+" EV";$("calV").textContent=thirds(S.calib)+" EV";
+  [...$("presets").children].forEach(b=>b.setAttribute("aria-pressed",S.source==="preset"&&b.dataset.n===S.preset));
+  $("mCenter").setAttribute("aria-pressed",S.meter==="center");$("mSpot").setAttribute("aria-pressed",S.meter==="spot");
+  const ret=$("ret");
+  if(S.photo&&S.meter==="spot"&&S.spot){ret.hidden=false;ret.style.left=S.spot.x*100+"%";ret.style.top=S.spot.y*100+"%"}else ret.hidden=true;
+}
+function drawScale(){
+  const lo=-2,hi=20,x0=12,x1=328,X=e=>x0+(e-lo)/(hi-lo)*(x1-x0);
+  let s=`<line class="base" x1="${x0}" y1="30" x2="${x1}" y2="30"/>`;
+  for(let e=lo;e<=hi;e++){const big=e%2===0;s+=`<line class="tk" x1="${X(e)}" y1="${big?20:24}" x2="${X(e)}" y2="30"/>`;
+    if(big)s+=`<text class="tx" x="${X(e)}" y="44" text-anchor="middle">${e}</text>`}
+  const ex=Math.max(lo,Math.min(hi,S.ev100)),nx=X(ex)-X(lo);
+  s+=`<g style="transform:translateX(${nx}px)"><line class="nd" x1="${X(lo)}" y1="6" x2="${X(lo)}" y2="32"/><polygon class="ndh" points="${X(lo)-5},2 ${X(lo)+5},2 ${X(lo)},9"/></g>`;
+  $("scale").innerHTML=s;
+}
+function buildPick(){
+  const row=$("pickRow"),list=S.mode==="A"?APS:SHS.filter(t=>t<=30);
+  const cur=S.mode==="A"?S.ap:S.sh,key=S.mode+list.length;
+  if(row.dataset.k!==key){row.innerHTML=list.map(v=>`<button type="button" class="chip" data-v="${v}">${S.mode==="A"?apLabel(v):shLabel(v)}</button>`).join("");row.dataset.k=key;
+    [...row.children].forEach(b=>b.onclick=()=>{if(S.mode==="A")S.ap=+b.dataset.v;else S.sh=+b.dataset.v;render()})}
+  [...row.children].forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===cur));
+}
+
+/* ---------- wiring ---------- */
+$("isoRow").innerHTML=ISOS.map(i=>`<button type="button" class="chip" data-v="${i}">${i}</button>`).join("");
+[...$("isoRow").children].forEach(b=>b.onclick=()=>{S.iso=+b.dataset.v;store.set("lm.iso",S.iso);render()});
+$("modeA").onclick=()=>{S.mode="A";render()};$("modeS").onclick=()=>{S.mode="S";render()};
+$("compM").onclick=()=>{S.comp=Math.max(-9,S.comp-1);render()};$("compP").onclick=()=>{S.comp=Math.min(9,S.comp+1);render()};
+$("calM").onclick=()=>{S.calib=Math.max(-6,S.calib-1);store.set("lm.calib",S.calib);render()};
+$("calP").onclick=()=>{S.calib=Math.min(6,S.calib+1);store.set("lm.calib",S.calib);render()};
+$("presets").innerHTML=PRESETS.map(([n,e])=>`<button type="button" class="preset" data-n="${n}" data-e="${e}">${n}<span>EV ${e}</span></button>`).join("");
+[...$("presets").children].forEach(b=>b.onclick=()=>{S.source="preset";S.preset=b.dataset.n;S.ev100=+b.dataset.e;render()});
+$("mCenter").onclick=()=>{S.meter="center";render()};
+$("mSpot").onclick=()=>{S.meter="spot";if(!S.spot)S.spot={x:.5,y:.5};render()};
+$("shot").addEventListener("click",ev=>{if(!S.photo)return;const r=$("img").getBoundingClientRect();
+  S.spot={x:Math.min(1,Math.max(0,(ev.clientX-r.left)/r.width)),y:Math.min(1,Math.max(0,(ev.clientY-r.top)/r.height))};
+  S.meter="spot";S.source="photo";render()});
+
+function handle(file){
+  if(!file)return;
+  const fr=new FileReader();
+  fr.onload=()=>{
+    const exif=readExif(fr.result);
+    const url=URL.createObjectURL(file),img=$("img");
+    img.onload=()=>{
+      $("shot").hidden=false;
+      if(!exif){S.photo=null;$("meterSeg").hidden=true;
+        $("note").innerHTML='<span>This photo has no exposure data, so it can\'t be metered. Choose the original from your camera roll (not a screenshot or edited copy), or use Sunny 16 below.</span>';
+        $("src").innerHTML="<b>No reading</b> · showing the previous value";return}
+      S.photo={exif,grid:lumGrid(img)};S.source="photo";S.spot=null;S.meter="center";$("meterSeg").hidden=false;render();
+      $("shot").scrollIntoView({behavior:"smooth",block:"nearest"});
+    };
+    img.onerror=()=>{$("note").innerHTML="<span>That image format couldn't be opened. Set your camera to save JPEG (Most Compatible) and try again.</span>"};
+    img.src=url;
+  };
+  fr.readAsArrayBuffer(file);
+}
+$("cam").onchange=e=>{handle(e.target.files[0]);e.target.value=""};
+$("lib").onchange=e=>{handle(e.target.files[0]);e.target.value=""};
+render();
+})();
+</script>
+
+<script>
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+</script>
+</body>
+</html>
