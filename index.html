@@ -38,9 +38,10 @@ img{max-width:100%}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px}
-.wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 h1{font-family:var(--f-display);font-weight:700;font-size:26px;letter-spacing:.06em;text-transform:uppercase;margin:0}
+h2{font-family:var(--f-display);font-weight:700;font-size:18px;letter-spacing:.08em;text-transform:uppercase;margin:0}
 .tag{font-family:var(--f-mono);font-size:11px;color:var(--muted);letter-spacing:.04em}
 .label{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 section{display:flex;flex-direction:column;gap:8px}
@@ -49,8 +50,7 @@ section{display:flex;flex-direction:column;gap:8px}
 .face{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
 .src{font-size:13px;color:var(--muted);min-height:1.2em}
 .src b{color:var(--ink);font-weight:600}
-.reading{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
-.big{font-family:var(--f-display);font-weight:700;font-size:64px;line-height:.95;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.big{font-family:var(--f-display);font-weight:700;font-size:clamp(44px,15vw,64px);line-height:.95;letter-spacing:.01em;font-variant-numeric:tabular-nums}
 .big .sep{color:var(--needle);padding:0 .08em}
 .sub{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
 .sub span b{color:var(--ink);font-weight:500}
@@ -58,37 +58,56 @@ section{display:flex;flex-direction:column;gap:8px}
 .scale .tk{stroke:var(--muted);stroke-width:1}
 .scale .tx{fill:var(--muted);font-family:var(--f-mono);font-size:9px}
 .scale .base{stroke:var(--line);stroke-width:1}
-.scale .nd{stroke:var(--needle);stroke-width:2.5;transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
-.scale .ndh{fill:var(--needle);transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+.scale .nd{stroke:var(--needle);stroke-width:2.5}
+.scale .ndh{fill:var(--needle)}
+.scale g{transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
 .note{font-size:13px;color:var(--warn);display:flex;flex-direction:column;gap:2px}
+.note .rc{color:var(--ink)}
+.note .rc b{color:var(--needle)}
 
 /* photo */
 .shot{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--panel);cursor:crosshair}
 .shot img{display:block;width:100%;height:auto}
 .ret{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #0008, inset 0 0 0 1px #0008;pointer-events:none}
 .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:10px;border:1px solid var(--line);
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 14px;border-radius:10px;border:1px solid var(--line);
   background:var(--panel);color:var(--ink);font-family:var(--f-display);font-weight:600;font-size:16px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
 .btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.btn:focus-visible,.chip:focus-visible,.step:focus-visible{outline:2px solid var(--needle);outline-offset:2px}
+.btn.small{min-height:40px;font-size:14px}
+.btn.danger{color:var(--needle);border-color:var(--needle)}
+.btn:focus-visible,.step:focus-visible,.sel:focus-visible,.seg button:focus-visible{outline:2px solid var(--needle);outline-offset:2px}
 .pick{position:relative;display:grid}
 .pick input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:1}
 .pick:focus-within .btn{outline:2px solid var(--needle);outline-offset:2px}
 
-/* chips */
-.row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.row::-webkit-scrollbar{display:none}
-.chip{flex:0 0 auto;min-width:48px;height:40px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);
-  font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--needle);border-color:var(--needle);color:#fff}
+/* controls */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.sel{width:100%;height:44px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);
+  font-family:var(--f-mono);font-size:16px;padding:0 10px;font-variant-numeric:tabular-nums}
+select.sel{appearance:none;-webkit-appearance:none;padding-right:30px;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 16px) 19px,calc(100% - 11px) 19px;background-size:5px 5px;background-repeat:no-repeat}
 .seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .seg button{height:40px;border:0;background:var(--panel);color:var(--muted);font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
-
 .stepper{display:flex;align-items:center;gap:10px}
 .step{width:44px;height:40px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:20px;cursor:pointer}
 .stepval{flex:1;text-align:center;font-family:var(--f-mono);font-size:16px;font-variant-numeric:tabular-nums}
 .hint{font-size:12.5px;color:var(--muted)}
+.check{display:flex;align-items:center;gap:8px;font-size:14px}
+.check input{width:20px;height:20px;accent-color:var(--needle)}
+
+/* reciprocity panel */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.panel .sel{background-color:var(--bg)}
+.out{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px}
+.out .t{font-family:var(--f-display);font-weight:700;font-size:44px;line-height:1;font-variant-numeric:tabular-nums}
+.out .s{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.timer{font-family:var(--f-mono);font-size:28px;font-variant-numeric:tabular-nums;text-align:center}
+.timer.done{color:var(--needle)}
+.form{display:flex;flex-direction:column;gap:10px;border:1px dashed var(--line);border-radius:10px;padding:12px}
+.warnline{font-size:13px;color:var(--warn)}
 
 /* table */
 table{width:100%;border-collapse:collapse;font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
@@ -97,7 +116,6 @@ td{padding:8px;border-bottom:1px solid var(--line)}
 tr.on td{background:var(--needle-soft)}
 tr.on td:first-child{box-shadow:inset 3px 0 0 var(--needle)}
 td.dim{color:var(--muted)}
-td .adj{color:var(--muted);font-size:12px;margin-left:6px}
 details{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 summary{cursor:pointer;font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase}
 details p{margin:.6em 0 0;font-size:14px;max-width:62ch}
@@ -105,11 +123,10 @@ details p{margin:.6em 0 0;font-size:14px;max-width:62ch}
 .preset{text-align:left;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;font-family:var(--f-body);font-size:14px;display:flex;justify-content:space-between;gap:8px}
 .preset span{font-family:var(--f-mono);color:var(--muted);font-size:12px}
 .preset[aria-pressed="true"]{border-color:var(--needle);box-shadow:inset 0 0 0 1px var(--needle)}
-@media (prefers-reduced-motion:reduce){.scale .nd,.scale .ndh{transition:none}}
+@media (prefers-reduced-motion:reduce){.scale g{transition:none}}
 </style>
 </head>
 <body>
-
 <div class="wrap">
   <header>
     <h1>Clud Light Meter</h1>
@@ -118,7 +135,7 @@ details p{margin:.6em 0 0;font-size:14px;max-width:62ch}
 
   <div class="face" aria-live="polite">
     <div class="src" id="src"></div>
-    <div class="reading"><div class="big" id="big">f/8<span class="sep">·</span>1/250</div></div>
+    <div class="big" id="big">f/8<span class="sep">·</span>1/250</div>
     <div class="sub" id="sub"></div>
     <svg class="scale" id="scale" viewBox="0 0 340 50" role="img" aria-label="Exposure value scale"></svg>
     <div class="note" id="note"></div>
@@ -129,7 +146,6 @@ details p{margin:.6em 0 0;font-size:14px;max-width:62ch}
       <div class="pick"><span class="btn primary" aria-hidden="true">Take reading</span><input type="file" id="cam" accept="image/*" capture="environment" aria-label="Take reading with camera"></div>
       <div class="pick"><span class="btn" aria-hidden="true">From photos</span><input type="file" id="lib" accept="image/*" aria-label="Choose a photo to meter"></div>
     </div>
-    
     <div class="shot" id="shot" hidden><img id="img" alt="Metered scene"><div class="ret" id="ret" hidden></div></div>
     <div class="seg" id="meterSeg" hidden>
       <button type="button" id="mCenter" aria-pressed="true">Center-weighted</button>
@@ -138,8 +154,13 @@ details p{margin:.6em 0 0;font-size:14px;max-width:62ch}
   </section>
 
   <section>
-    <span class="label">Film speed · ISO</span>
-    <div class="row" id="isoRow"></div>
+    <div class="grid2">
+      <label class="field"><span class="label">Film ISO</span><select class="sel" id="isoSel"></select></label>
+      <label class="field"><span class="label">Increments</span>
+        <select class="sel" id="incSel"><option value="1">Full stops</option><option value="2">½ stops</option><option value="3">⅓ stops</option></select></label>
+    </div>
+    <label class="field" id="isoCustomWrap" hidden><span class="label">Custom ISO (1 – 12800)</span>
+      <input class="sel" id="isoCustom" type="number" inputmode="numeric" min="1" max="12800" step="1"></label>
   </section>
 
   <section>
@@ -147,7 +168,7 @@ details p{margin:.6em 0 0;font-size:14px;max-width:62ch}
       <button type="button" id="modeA" aria-pressed="true">Set aperture</button>
       <button type="button" id="modeS" aria-pressed="false">Set shutter</button>
     </div>
-    <div class="row" id="pickRow"></div>
+    <label class="field"><span class="label" id="pickLabel">Your aperture</span><select class="sel" id="pickSel"></select></label>
   </section>
 
   <section>
@@ -159,6 +180,46 @@ details p{margin:.6em 0 0;font-size:14px;max-width:62ch}
     </div>
     <span class="hint">Add +1 to +2 for snow, beaches or backlit subjects. Subtract for dark scenes you want to stay dark.</span>
   </section>
+
+  <div class="panel" id="recip">
+    <h2>Reciprocity</h2>
+    <span class="hint">Film loses sensitivity on long exposures. Pick your film and enter the metered time to get the time to actually expose.</span>
+    <label class="field"><span class="label">Film / correction</span><select class="sel" id="filmSel"></select></label>
+    <label class="field" id="knownWrap" hidden><span class="label">Exponent (p) from your film's data</span>
+      <input class="sel" id="knownP" type="number" inputmode="decimal" min="1" max="2.5" step="0.01">
+      <span class="hint">Corrected time = metered time<sup>p</sup>, for times over 1 second. Ilford lists p on each data sheet.</span></label>
+
+    <div class="form" id="newForm" hidden>
+      <span class="label">New preset from your testing</span>
+      <label class="field"><span class="label">Name</span><input class="sel" id="pName" type="text" maxlength="40" placeholder="e.g. HP5 in my D-76"></label>
+      <div class="seg">
+        <button type="button" id="pmTest" aria-pressed="true">From a test</button>
+        <button type="button" id="pmExp" aria-pressed="false">Exponent</button>
+      </div>
+      <div class="grid2" id="pTestWrap">
+        <label class="field"><span class="label">Metered (s)</span><input class="sel" id="pMet" type="number" inputmode="decimal" min="1.1" step="any" placeholder="10"></label>
+        <label class="field"><span class="label">Needed (s)</span><input class="sel" id="pNeed" type="number" inputmode="decimal" min="1.1" step="any" placeholder="25"></label>
+      </div>
+      <label class="field" id="pExpWrap" hidden><span class="label">Exponent (p)</span><input class="sel" id="pExp" type="number" inputmode="decimal" min="1" max="2.5" step="0.01" placeholder="1.3"></label>
+      <span class="hint" id="pDerived">Enter one long exposure that came out right: what the meter said, and what you actually gave it.</span>
+      <div class="btns"><button type="button" class="btn small primary" id="pSave">Save preset</button><button type="button" class="btn small" id="pCancel">Cancel</button></div>
+    </div>
+
+    <div class="grid2">
+      <label class="field"><span class="label">Metered time (s)</span><input class="sel" id="metT" type="number" inputmode="decimal" min="0" step="any"></label>
+      <div class="field"><span class="label">&nbsp;</span><label class="check"><input type="checkbox" id="follow" checked> Follow meter</label></div>
+    </div>
+    <div class="out">
+      <div><div class="label">Expose for</div><div class="t" id="recT">—</div></div>
+      <div class="s" id="recS"></div>
+    </div>
+    <div class="warnline" id="recW"></div>
+    <div class="timer" id="timerV" hidden>0:00</div>
+    <div class="btns">
+      <button type="button" class="btn small" id="timerBtn">Start timer</button>
+      <button type="button" class="btn small danger" id="delPreset" hidden>Delete preset</button>
+    </div>
+  </div>
 
   <section>
     <span class="label">Equivalent exposures</span>
@@ -184,28 +245,65 @@ details p{margin:.6em 0 0;font-size:14px;max-width:62ch}
   <details>
     <summary>How it works</summary>
     <p>Your phone camera picks its own exposure for each photo and records it (shutter, aperture, ISO). From that the meter works out the light level in exposure value (EV). It then checks how bright the metered area came out compared with 18% grey, and corrects for it.</p>
-    <p>Pick photos straight from the camera. Screenshots, edited or messaged images usually lose the exposure data. For exposures longer than 1 second, add time for reciprocity failure per your film's data sheet.</p>
+    <p>Pick photos straight from the camera. Screenshots, edited or messaged images usually lose the exposure data.</p>
+    <p>Reciprocity figures come from the film makers' data sheets (Ilford's exponents, Kodak's and Fujifilm's tables). Past the longest time a maker lists, the app extends their curve and says so. Treat that as a starting point and bracket.</p>
   </details>
 </div>
 
 <script>
 (()=>{
-const ISOS=[25,50,100,125,160,200,400,800,1600,3200];
-const APS=[1.4,2,2.8,4,5.6,8,11,16,22];
-const AP3=[1.4,1.6,1.8,2,2.2,2.5,2.8,3.2,3.5,4,4.5,5,5.6,6.3,7.1,8,9,10,11,13,14,16,18,20,22];
-const SHS=[1/4000,1/2000,1/1000,1/500,1/250,1/125,1/60,1/30,1/15,1/8,1/4,1/2,1,2,4,8,15,30];
+/* ---------- scales ---------- */
+const ISOS=[1,3,6,12,25,32,40,50,64,80,100,125,160,200,250,320,400,500,640,800,1000,1250,1600,2000,2500,3200,4000,5000,6400,8000,10000,12800];
+const AP={1:[1,1.4,2,2.8,4,5.6,8,11,16,22,32],
+  2:[1,1.2,1.4,1.7,2,2.4,2.8,3.3,4,4.8,5.6,6.7,8,9.5,11,13,16,19,22,27,32],
+  3:[1,1.1,1.2,1.4,1.6,1.8,2,2.2,2.5,2.8,3.2,3.5,4,4.5,5,5.6,6.3,7.1,8,9,10,11,13,14,16,18,20,22,25,29,32]};
+const r=a=>a.map(x=>typeof x==="number"?x:1/+x.slice(2));
+const SH={1:r(["1/8000","1/4000","1/2000","1/1000","1/500","1/250","1/125","1/60","1/30","1/15","1/8","1/4","1/2",1,2,4,8,15,30]),
+  2:r(["1/8000","1/6000","1/4000","1/3000","1/2000","1/1500","1/1000","1/750","1/500","1/350","1/250","1/180","1/125","1/90","1/60","1/45","1/30","1/20","1/15","1/10","1/8","1/6","1/4",0.3,"1/2",0.7,1,1.5,2,3,4,6,8,11,15,22,30]),
+  3:r(["1/8000","1/6400","1/5000","1/4000","1/3200","1/2500","1/2000","1/1600","1/1250","1/1000","1/800","1/640","1/500","1/400","1/320","1/250","1/200","1/160","1/125","1/100","1/80","1/60","1/50","1/40","1/30","1/25","1/20","1/15","1/13","1/10","1/8","1/6","1/5","1/4",0.3,0.4,0.5,0.6,0.8,1,1.3,1.6,2,2.5,3.2,4,5,6,8,10,13,15,20,25,30])};
+const TABLE_APS=[1.4,2,2.8,4,5.6,8,11,16,22];
 const PRESETS=[["Snow / sand, full sun",16],["Bright sun",15],["Hazy sun, soft shadows",14],["Cloudy bright",13],["Overcast",12],["Open shade",12],["Heavy overcast",11],["Sunset",10],["Bright indoors / stage",8],["Home interior",6],["Lit city street, night",5],["Candlelight",4]];
+
+/* Reciprocity profiles. pow: Tc = Tm^p beyond 1 s. tab: [seconds, stops of extra TIME], interpolated on log time.
+   Kodak points use Kodak's adjusted-time column (Tri-X 10s->50s, 100s->1200s; T-Max 10s->15s, 100s->200s/300s). */
+const FILMS=[
+  {id:"none",g:"General",name:"No correction",kind:"none"},
+  {id:"gen",g:"General",name:"General rule (unknown film)",kind:"pow",p:1.3},
+  {id:"known",g:"General",name:"Known exponent…",kind:"known"},
+  {id:"panf",g:"Ilford",name:"Pan F Plus 50",kind:"pow",p:1.33},
+  {id:"fp4",g:"Ilford",name:"FP4 Plus 125",kind:"pow",p:1.26},
+  {id:"hp5",g:"Ilford",name:"HP5 Plus 400",kind:"pow",p:1.31},
+  {id:"d100",g:"Ilford",name:"Delta 100",kind:"pow",p:1.26},
+  {id:"d400",g:"Ilford",name:"Delta 400",kind:"pow",p:1.41},
+  {id:"d3200",g:"Ilford",name:"Delta 3200",kind:"pow",p:1.33},
+  {id:"sfx",g:"Ilford",name:"SFX 200",kind:"pow",p:1.43},
+  {id:"xp2",g:"Ilford",name:"XP2 Super 400",kind:"pow",p:1.31},
+  {id:"trix",g:"Kodak",name:"Tri-X 400",kind:"tab",pts:[[0.1,0],[1,1],[10,2.32],[100,3.585]],dev:"Kodak also advises cutting development 10–30% at these times."},
+  {id:"tmx",g:"Kodak",name:"T-Max 100",kind:"tab",pts:[[0.1,0],[1,1/3],[10,.585],[100,1]]},
+  {id:"tmy",g:"Kodak",name:"T-Max 400",kind:"tab",pts:[[0.1,0],[1,1/3],[10,.585],[100,1.585]]},
+  {id:"acros",g:"Fujifilm",name:"Acros II 100",kind:"tab",pts:[[120,0],[1000,.5]]},
+  {id:"provia",g:"Fujifilm",name:"Provia 100F",kind:"tab",pts:[[120,0]],nodata:true}
+];
+
 const $=id=>document.getElementById(id);
 const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
-const S={iso:store.get("lm.iso",400),comp:0,calib:store.get("lm.calib",0),mode:"A",ap:8,sh:1/125,
-  source:"sample",ev100:13,preset:null,photo:null,meter:"center",spot:null,note:[]};
+const S={iso:store.get("lm.iso",400),inc:store.get("lm.inc",3),comp:0,calib:store.get("lm.calib",0),mode:"A",ap:8,sh:1/125,
+  source:"sample",ev100:13,preset:null,photo:null,meter:"center",spot:null,note:[],
+  film:store.get("lm.film","gen"),knownP:store.get("lm.knownP",1.3),mine:store.get("lm.mine",[]),
+  metT:1,follow:true,meterT:null};
 
 const log2=Math.log2;
-const shLabel=t=>t>=1?(t+"″"):("1/"+Math.round(1/t));
-const apLabel=n=>"f/"+(n<10&&n%1?n.toFixed(1):String(n));
 const nearest=(list,v)=>list.reduce((b,x)=>Math.abs(log2(x)-log2(v))<Math.abs(log2(b)-log2(v))?x:b,list[0]);
-const thirds=n=>{if(!n)return"0";const s=n>0?"+":"−",a=Math.abs(n),w=Math.floor(a/3),r=a%3;return s+(w?w:"")+(r===1?"⅓":r===2?"⅔":"")};
+function shLabel(t){if(t>=1)return(Number.isInteger(t)?t:(+t.toFixed(1)))+"″";const q=1/t;
+  if(t<=0.5&&Math.abs(q-Math.round(q))<0.02*q)return"1/"+Math.round(q);return(+t.toFixed(1))+"″"}
+const apLabel=n=>"f/"+(n<10&&!Number.isInteger(n)?n.toFixed(1):String(n));
+function fmtStops(x){if(Math.abs(x)<0.05)return"0";const s=x>0?"+":"−",a=Math.abs(x),w=Math.floor(a+0.02),f=a-w;
+  let fr="";if(Math.abs(f-1/3)<.04)fr="⅓";else if(Math.abs(f-.5)<.04)fr="½";else if(Math.abs(f-2/3)<.04)fr="⅔";else if(f>.04)return s+a.toFixed(1);
+  return s+(w?w:"")+fr}
+function fmtDur(s){if(s<1)return shLabel(s);if(s<10)return(+s.toFixed(1))+"s";if(Math.round(s)<60)return Math.round(s)+"s";
+  if(s<3600){let m=Math.floor(s/60),x=Math.round(s-m*60);if(x===60){m++;x=0}return x?m+"m "+x+"s":m+"m"}
+  let h=Math.floor(s/3600),m=Math.round((s-h*3600)/60);if(m===60){h++;m=0}return h+"h "+m+"m"}
 const evFmt=e=>(Math.round(e*3)/3).toFixed(1);
 
 /* ---------- EXIF ---------- */
@@ -251,17 +349,36 @@ function lumGrid(img){
 }
 function meterY(g){
   let sw=0,sy=0,clip=0;
-  const sx=S.spot?S.spot.x:.5, syy=S.spot?S.spot.y:.5, r=.045*Math.min(g.W,g.H);
+  const sx=S.spot?S.spot.x:.5, syy=S.spot?S.spot.y:.5, rad=.045*Math.min(g.W,g.H);
   for(let y=0;y<g.H;y++)for(let x=0;x<g.W;x++){
     const v=g.Y[y*g.W+x];let w;
-    if(S.meter==="spot"&&S.spot){const dx=x-sx*g.W,dy=y-syy*g.H;w=(dx*dx+dy*dy<=r*r)?1:0}
+    if(S.meter==="spot"&&S.spot){const dx=x-sx*g.W,dy=y-syy*g.H;w=(dx*dx+dy*dy<=rad*rad)?1:0}
     else{const dx=x/g.W-.5,dy=y/g.H-.5;w=Math.exp(-(dx*dx+dy*dy)/(2*.22*.22))}
     if(w){sw+=w;sy+=w*v;if(v>.97)clip+=w}
   }
   return {y:Math.max(sy/sw,1e-4),clip:clip/sw};
 }
 
-/* ---------- compute ---------- */
+/* ---------- reciprocity ---------- */
+function profile(id){
+  if(id==="known")return{id,name:"Known exponent",kind:"pow",p:S.knownP};
+  const m=S.mine.find(x=>x.id===id);if(m)return{id,name:m.name,kind:"pow",p:m.p,mine:true};
+  return FILMS.find(f=>f.id===id)||FILMS[1];
+}
+function recip(tm,pr){
+  if(!(tm>0))return null;
+  if(pr.kind==="none")return{tc:tm,stops:0,beyond:false};
+  if(pr.kind==="pow"){const tc=tm<=1?tm:Math.pow(tm,pr.p);return{tc,stops:log2(tc/tm),beyond:false}}
+  const P=pr.pts,L=Math.log10;let st,beyond=false;
+  if(tm<=P[0][0])st=P[0][1];
+  else if(tm>=P[P.length-1][0]){const n=P.length;
+    if(n<2)st=P[0][1];else{const[a,b]=[P[n-2],P[n-1]];st=b[1]+(b[1]-a[1])/(L(b[0])-L(a[0]))*(L(tm)-L(b[0]))}
+    beyond=tm>P[n-1][0]*1.05;}
+  else{for(let i=1;i<P.length;i++)if(tm<=P[i][0]){const[a,b]=[P[i-1],P[i]];st=a[1]+(b[1]-a[1])*(L(tm)-L(a[0]))/(L(b[0])-L(a[0]));break}}
+  return{tc:tm*Math.pow(2,st),stops:st,beyond};
+}
+
+/* ---------- compute + render ---------- */
 function compute(){
   S.note=[];
   if(S.source==="photo"&&S.photo){
@@ -270,51 +387,55 @@ function compute(){
     S.ev100=camEV+log2(m.y/.18);
     if(m.clip>.25) S.note.push("Much of the metered area is blown out. Reading may be too low; try spot metering a mid-tone.");
   }
-  const ev=S.ev100+log2(S.iso/100)-S.comp/3-S.calib/3;
-  return ev;
+  return S.ev100+log2(S.iso/100)-S.comp-S.calib/3;
 }
 
-/* ---------- render ---------- */
 function render(){
-  const ev=compute(), k=Math.pow(2,ev);
-  let ap,sh,exact,rangeMsg="";
-  if(S.mode==="A"){ap=S.ap;exact=ap*ap/k;sh=nearest(SHS,exact);
-    if(exact>30*1.4)rangeMsg="Needs longer than 30″. Open up the aperture or use bulb.";
-    if(exact<1/4000/1.4)rangeMsg="Too bright for 1/4000. Stop down or use slower film.";
-  }else{sh=S.sh;const n=Math.sqrt(sh*k);ap=nearest(AP3,n);exact=null;
-    if(n<1.4/1.2)rangeMsg="Too dark for f/1.4 at this speed. Pick a slower shutter.";
-    if(n>22*1.2)rangeMsg="Too bright for f/22 at this speed. Pick a faster shutter.";
+  const ev=compute(),k=Math.pow(2,ev),APS=AP[S.inc],SHS=SH[S.inc];
+  let ap,sh,t,msg="",bulb=false;
+  if(S.mode==="A"){ap=S.ap;t=ap*ap/k;
+    if(t>30*1.2){bulb=true;sh=t}else sh=nearest(SHS,t);
+    if(t<SHS[0]/1.2)msg="Too bright for 1/8000. Stop down or use slower film.";
+  }else{sh=S.sh;t=sh;const n=Math.sqrt(sh*k);ap=nearest(APS,n);
+    if(n<APS[0]/1.12)msg="Too dark for f/1 at this speed. Pick a slower shutter.";
+    if(n>APS[APS.length-1]*1.12)msg="Too bright for f/32 at this speed. Pick a faster shutter.";
   }
-  $("big").innerHTML=apLabel(ap)+'<span class="sep">·</span>'+shLabel(sh);
+  $("big").innerHTML=apLabel(ap)+'<span class="sep">·</span>'+(bulb?"B "+fmtDur(sh):shLabel(sh));
 
   const srcTxt={sample:'<b>Sample reading</b> (cloudy bright). Take a reading to meter your scene.',
     preset:'<b>Sunny 16:</b> '+(S.preset||""),
-    photo:S.photo?('<b>Metered photo</b> · phone shot '+apLabel(+S.photo.exif.f.toFixed(1))+' · '+(S.photo.exif.time>=1?S.photo.exif.time+'″':'1/'+Math.round(1/S.photo.exif.time))+' · ISO '+Math.round(S.photo.exif.iso)+' · '+(S.meter==="spot"&&S.spot?"spot":"center-weighted")):''};
+    photo:S.photo?('<b>Metered photo</b> · phone shot '+apLabel(+S.photo.exif.f.toFixed(1))+' · '+shLabel(S.photo.exif.time)+' · ISO '+Math.round(S.photo.exif.iso)+' · '+(S.meter==="spot"&&S.spot?"spot":"center-weighted")):''};
   $("src").innerHTML=srcTxt[S.source];
-  $("sub").innerHTML=`<span>EV<sub>100</sub> <b>${evFmt(S.ev100)}</b></span><span>ISO <b>${S.iso}</b></span><span>Comp <b>${thirds(S.comp+S.calib)}</b></span>`;
+  $("sub").innerHTML=`<span>EV<sub>100</sub> <b>${evFmt(S.ev100)}</b></span><span>ISO <b>${S.iso}</b></span><span>Comp <b>${fmtStops(S.comp+S.calib/3)}</b></span>`;
 
-  const notes=[...S.note];
-  if(rangeMsg)notes.push(rangeMsg);
-  const t=S.mode==="A"?exact:sh;
-  if(!rangeMsg&&t>1)notes.push("Long exposure: add time for reciprocity failure per your film's data sheet.");
-  else if(!rangeMsg&&t>1/30)notes.push("Slow shutter. Brace the camera or use a tripod.");
-  $("note").innerHTML=notes.map(n=>`<span>${n}</span>`).join("");
+  // meter time feeds reciprocity
+  S.meterT=bulb?t:sh;
+  if(S.follow){S.metT=+S.meterT.toPrecision(3);if(document.activeElement!==$("metT"))$("metT").value=S.metT}
+
+  const notes=S.note.map(n=>`<span>${n}</span>`);
+  if(msg)notes.push(`<span>${msg}</span>`);
+  if(!msg&&S.meterT>=1){const pr=profile(S.film),rc=recip(S.meterT,pr);
+    if(pr.kind!=="none"&&rc)notes.push(`<span class="rc">Long exposure. With reciprocity (${pr.name}) expose <b>${fmtDur(rc.tc)}</b>${rc.beyond?" (beyond published data)":""}.</span>`);
+    else notes.push("<span>Long exposure. Pick your film under Reciprocity to correct it.</span>");}
+  else if(!msg&&S.meterT>1/30)notes.push("<span>Slow shutter. Brace the camera or use a tripod.</span>");
+  $("note").innerHTML=notes.join("");
 
   drawScale();
-  // table
-  $("tbl").innerHTML=APS.map(n=>{const ex=n*n/k,s=nearest(SHS,ex),d=Math.round(log2(ex/s)*3);
-    const out=ex>30*1.4||ex<1/4000/1.4;
-    const on=S.mode==="A"?n===S.ap:Math.abs(log2(n)-log2(ap))<.3;
-    return `<tr class="${on?"on":""}"><td>${apLabel(n)}</td><td class="${out?"dim":""}">${out?(ex>30?"over 30″":"faster than 1/4000"):shLabel(s)+(d?`<span class="adj">${thirds(d)} stop</span>`:"")}</td></tr>`}).join("");
-  // chips
-  [...$("isoRow").children].forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===S.iso));
+  $("tbl").innerHTML=TABLE_APS.map(n=>{const ex=n*n/k;let cell,dim=false;
+    if(ex<SHS[0]/1.2){cell="faster than 1/8000";dim=true}
+    else if(ex>30*1.2)cell="B "+fmtDur(ex);
+    else cell=shLabel(nearest(SHS,ex));
+    const on=Math.abs(log2(n)-log2(ap))<.17;
+    return `<tr class="${on?"on":""}"><td>${apLabel(n)}</td><td class="${dim?"dim":""}">${cell}</td></tr>`}).join("");
+
   $("modeA").setAttribute("aria-pressed",S.mode==="A");$("modeS").setAttribute("aria-pressed",S.mode==="S");
   buildPick();
-  $("compV").textContent=thirds(S.comp)+" EV";$("calV").textContent=thirds(S.calib)+" EV";
+  $("compV").textContent=fmtStops(S.comp)+" EV";$("calV").textContent=fmtStops(S.calib/3)+" EV";
   [...$("presets").children].forEach(b=>b.setAttribute("aria-pressed",S.source==="preset"&&b.dataset.n===S.preset));
   $("mCenter").setAttribute("aria-pressed",S.meter==="center");$("mSpot").setAttribute("aria-pressed",S.meter==="spot");
   const ret=$("ret");
   if(S.photo&&S.meter==="spot"&&S.spot){ret.hidden=false;ret.style.left=S.spot.x*100+"%";ret.style.top=S.spot.y*100+"%"}else ret.hidden=true;
+  renderRecip();
 }
 function drawScale(){
   const lo=-2,hi=20,x0=12,x1=328,X=e=>x0+(e-lo)/(hi-lo)*(x1-x0);
@@ -326,26 +447,116 @@ function drawScale(){
   $("scale").innerHTML=s;
 }
 function buildPick(){
-  const row=$("pickRow"),list=S.mode==="A"?APS:SHS.filter(t=>t<=30);
-  const cur=S.mode==="A"?S.ap:S.sh,key=S.mode+list.length;
-  if(row.dataset.k!==key){row.innerHTML=list.map(v=>`<button type="button" class="chip" data-v="${v}">${S.mode==="A"?apLabel(v):shLabel(v)}</button>`).join("");row.dataset.k=key;
-    [...row.children].forEach(b=>b.onclick=()=>{if(S.mode==="A")S.ap=+b.dataset.v;else S.sh=+b.dataset.v;render()})}
-  [...row.children].forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===cur));
+  const sel=$("pickSel"),list=S.mode==="A"?AP[S.inc]:SH[S.inc],key=S.mode+S.inc;
+  $("pickLabel").textContent=S.mode==="A"?"Your aperture":"Your shutter speed";
+  if(sel.dataset.k!==key){sel.innerHTML=list.map((v,i)=>`<option value="${i}">${S.mode==="A"?apLabel(v):shLabel(v)}</option>`).join("");sel.dataset.k=key;
+    if(S.mode==="A")S.ap=nearest(list,S.ap);else S.sh=nearest(list,S.sh)}
+  sel.value=String(list.indexOf(S.mode==="A"?S.ap:S.sh));
 }
 
-/* ---------- wiring ---------- */
-$("isoRow").innerHTML=ISOS.map(i=>`<button type="button" class="chip" data-v="${i}">${i}</button>`).join("");
-[...$("isoRow").children].forEach(b=>b.onclick=()=>{S.iso=+b.dataset.v;store.set("lm.iso",S.iso);render()});
+/* ---------- reciprocity UI ---------- */
+function buildFilmSel(){
+  const groups={};FILMS.forEach(f=>(groups[f.g]=groups[f.g]||[]).push(`<option value="${f.id}">${f.name}</option>`));
+  let h=Object.entries(groups).map(([g,o])=>`<optgroup label="${g}">${o.join("")}</optgroup>`).join("");
+  h+=`<optgroup label="My presets">${S.mine.map(m=>`<option value="${m.id}">${esc(m.name)} (p ${m.p.toFixed(2)})</option>`).join("")}<option value="new">+ New preset from testing…</option></optgroup>`;
+  $("filmSel").innerHTML=h;
+  if(!profileExists(S.film))S.film="gen";
+  $("filmSel").value=S.film;
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const profileExists=id=>id==="known"||FILMS.some(f=>f.id===id)||S.mine.some(m=>m.id===id);
+
+function renderRecip(){
+  const pr=profile(S.film);
+  $("knownWrap").hidden=S.film!=="known";
+  $("delPreset").hidden=!pr.mine;
+  if(!pr.mine)resetDel();
+  const tm=parseFloat($("metT").value);
+  const rc=recip(tm,pr);
+  if(!rc){$("recT").textContent="—";$("recS").textContent="";$("recW").textContent="";return}
+  $("recT").textContent=fmtDur(rc.tc);
+  $("recS").textContent=pr.kind==="none"?"no correction":(fmtStops(rc.stops)+" stops"+(pr.kind==="pow"?` · p ${pr.p.toFixed(2)}`:""));
+  const w=[];
+  if(rc.beyond)w.push(pr.nodata?`${pr.name} needs no correction up to 2 min; Fujifilm gives no figure past that. Bracket.`:`Beyond ${pr.name}'s published data; this extends the curve. Bracket.`);
+  if(pr.dev&&tm>=1)w.push(pr.dev);
+  if(tm<=1&&pr.kind!=="none")w.push("No correction needed at 1 second or shorter.");
+  $("recW").textContent=w.join(" ");
+  S.recTc=rc.tc;
+}
+$("filmSel").onchange=e=>{const v=e.target.value;
+  if(v==="new"){$("newForm").hidden=false;e.target.value=S.film;$("pName").focus();return}
+  S.film=v;store.set("lm.film",v);render()};
+$("knownP").value=S.knownP;
+$("knownP").oninput=e=>{const p=parseFloat(e.target.value);if(p>=1&&p<=2.5){S.knownP=p;store.set("lm.knownP",p);render()}};
+$("metT").oninput=()=>{S.follow=false;$("follow").checked=false;renderRecip()};
+$("follow").onchange=e=>{S.follow=e.target.checked;render()};
+
+let pMode="test";
+function setPMode(m){pMode=m;$("pmTest").setAttribute("aria-pressed",m==="test");$("pmExp").setAttribute("aria-pressed",m==="exp");
+  $("pTestWrap").hidden=m!=="test";$("pExpWrap").hidden=m!=="exp";derive()}
+function derive(){
+  let p=null,msg;
+  if(pMode==="test"){const a=parseFloat($("pMet").value),b=parseFloat($("pNeed").value);
+    if(a>1&&b>=a){p=Math.log(b)/Math.log(a);msg=`That works out to p ${p.toFixed(2)} (+${log2(b/a).toFixed(1)} stops at ${fmtDur(a)}).`}
+    else if(a>0&&a<=1)msg="Use a test where the meter said more than 1 second.";
+    else if(a>1&&b<a)msg="Needed time should be at least the metered time.";
+    else msg="Enter one long exposure that came out right: what the meter said, and what you actually gave it.";}
+  else{const v=parseFloat($("pExp").value);if(v>=1&&v<=2.5){p=v;msg=`p ${v.toFixed(2)}: 10s metered becomes ${fmtDur(Math.pow(10,v))}.`}else msg="Exponents are usually between 1.1 and 1.6."}
+  $("pDerived").textContent=msg;return p;
+}
+["pMet","pNeed","pExp"].forEach(id=>$(id).oninput=derive);
+$("pmTest").onclick=()=>setPMode("test");$("pmExp").onclick=()=>setPMode("exp");
+$("pCancel").onclick=()=>{$("newForm").hidden=true};
+$("pSave").onclick=()=>{const p=derive(),name=$("pName").value.trim();
+  if(!name){$("pDerived").textContent="Give the preset a name.";$("pName").focus();return}
+  if(!p){return}
+  const id="u"+Date.now().toString(36);S.mine.push({id,name,p:+p.toFixed(3)});store.set("lm.mine",S.mine);
+  S.film=id;store.set("lm.film",id);buildFilmSel();$("newForm").hidden=true;["pName","pMet","pNeed","pExp"].forEach(x=>$(x).value="");render()};
+let delArmed=false;
+function resetDel(){delArmed=false;$("delPreset").textContent="Delete preset"}
+$("delPreset").onclick=()=>{if(!delArmed){delArmed=true;$("delPreset").textContent="Tap again to delete";return}
+  S.mine=S.mine.filter(m=>m.id!==S.film);store.set("lm.mine",S.mine);S.film="gen";store.set("lm.film","gen");resetDel();buildFilmSel();render()};
+
+/* timer */
+let tmr=null,end=0,wake=null,actx=null;
+function beep(){try{if(!actx)return;const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;g.gain.value=.2;o.connect(g).connect(actx.destination);o.start();o.stop(actx.currentTime+.6)}catch(e){}}
+function stopTimer(label){clearInterval(tmr);tmr=null;$("timerBtn").textContent=label||"Start timer";try{wake&&wake.release()}catch(e){}wake=null}
+$("timerBtn").onclick=async()=>{
+  if(tmr){stopTimer();$("timerV").hidden=true;return}
+  const s=S.recTc;if(!(s>0))return;
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();actx.resume&&actx.resume()}catch(e){}
+  try{wake=await navigator.wakeLock.request("screen")}catch(e){wake=null}
+  end=Date.now()+s*1000;$("timerV").hidden=false;$("timerV").classList.remove("done");$("timerBtn").textContent="Stop timer";
+  const tick=()=>{const left=Math.max(0,(end-Date.now())/1000),m=Math.floor(left/60),x=Math.ceil(left-m*60);
+    $("timerV").textContent=left>0?(x===60?(m+1)+":00":m+":"+String(x).padStart(2,"0")):"Close the shutter";
+    if(left<=0){$("timerV").classList.add("done");stopTimer("Start timer");beep();try{navigator.vibrate&&navigator.vibrate([300,120,300,120,300])}catch(e){}}};
+  tick();tmr=setInterval(tick,250)};
+
+/* ---------- other wiring ---------- */
+function buildIso(){
+  const inList=ISOS.includes(S.iso);
+  $("isoSel").innerHTML=ISOS.map(i=>`<option value="${i}">${i}</option>`).join("")+`<option value="custom">Custom…</option>`;
+  $("isoSel").value=inList?String(S.iso):"custom";
+  $("isoCustomWrap").hidden=inList;$("isoCustom").value=S.iso;
+}
+$("isoSel").onchange=e=>{if(e.target.value==="custom"){$("isoCustomWrap").hidden=false;$("isoCustom").value=S.iso;$("isoCustom").focus();return}
+  $("isoCustomWrap").hidden=true;S.iso=+e.target.value;store.set("lm.iso",S.iso);render()};
+$("isoCustom").oninput=e=>{const v=Math.round(parseFloat(e.target.value));if(v>=1&&v<=12800){S.iso=v;store.set("lm.iso",v);render()}};
+$("isoCustom").onblur=e=>{e.target.value=S.iso};
+$("incSel").value=String(S.inc);
+$("incSel").onchange=e=>{S.inc=+e.target.value;store.set("lm.inc",S.inc);S.comp=Math.round(S.comp*S.inc)/S.inc;render()};
+$("pickSel").onchange=e=>{const i=+e.target.value;if(S.mode==="A")S.ap=AP[S.inc][i];else S.sh=SH[S.inc][i];render()};
 $("modeA").onclick=()=>{S.mode="A";render()};$("modeS").onclick=()=>{S.mode="S";render()};
-$("compM").onclick=()=>{S.comp=Math.max(-9,S.comp-1);render()};$("compP").onclick=()=>{S.comp=Math.min(9,S.comp+1);render()};
+$("compM").onclick=()=>{S.comp=Math.max(-3,+(S.comp-1/S.inc).toFixed(4));render()};
+$("compP").onclick=()=>{S.comp=Math.min(3,+(S.comp+1/S.inc).toFixed(4));render()};
 $("calM").onclick=()=>{S.calib=Math.max(-6,S.calib-1);store.set("lm.calib",S.calib);render()};
 $("calP").onclick=()=>{S.calib=Math.min(6,S.calib+1);store.set("lm.calib",S.calib);render()};
 $("presets").innerHTML=PRESETS.map(([n,e])=>`<button type="button" class="preset" data-n="${n}" data-e="${e}">${n}<span>EV ${e}</span></button>`).join("");
 [...$("presets").children].forEach(b=>b.onclick=()=>{S.source="preset";S.preset=b.dataset.n;S.ev100=+b.dataset.e;render()});
 $("mCenter").onclick=()=>{S.meter="center";render()};
 $("mSpot").onclick=()=>{S.meter="spot";if(!S.spot)S.spot={x:.5,y:.5};render()};
-$("shot").addEventListener("click",ev=>{if(!S.photo)return;const r=$("img").getBoundingClientRect();
-  S.spot={x:Math.min(1,Math.max(0,(ev.clientX-r.left)/r.width)),y:Math.min(1,Math.max(0,(ev.clientY-r.top)/r.height))};
+$("shot").addEventListener("click",ev=>{if(!S.photo)return;const rc=$("img").getBoundingClientRect();
+  S.spot={x:Math.min(1,Math.max(0,(ev.clientX-rc.left)/rc.width)),y:Math.min(1,Math.max(0,(ev.clientY-rc.top)/rc.height))};
   S.meter="spot";S.source="photo";render()});
 
 function handle(file){
@@ -369,10 +580,12 @@ function handle(file){
 }
 $("cam").onchange=e=>{handle(e.target.files[0]);e.target.value=""};
 $("lib").onchange=e=>{handle(e.target.files[0]);e.target.value=""};
-render();
+
+// remember old 3rd-stop compensation users had nothing saved; start clean
+if(![1,2,3].includes(S.inc))S.inc=3;
+buildIso();buildFilmSel();setPMode("test");render();
 })();
 </script>
-
 <script>
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
